@@ -1,38 +1,13 @@
-# load prerequisites
-using<-function(...) {
-  libs<-unlist(list(...))
-  req<-unlist(lapply(libs,require,character.only=TRUE))
-  need<-libs[req==FALSE]
-  n<-length(need)
-  if(n>0){
-    libsmsg<-if(n>2) paste(paste(need[1:(n-1)],collapse=", "),",",sep="") else need[1]
-    print(libsmsg)
-    if(n>1){
-      libsmsg<-paste(libsmsg," and ", need[n],sep="")
-    }
-    libsmsg<-paste("The following packages could not be found: ",libsmsg,"\n\r\n\rInstall missing packages?",collapse="")
-    if(winDialog(type = c("yesno"), libsmsg)=="YES"){       
-      install.packages(need)
-      lapply(need,require,character.only=TRUE)
-    }
-  }
-}
 
-detachAllPackages <- function() {
-  
-  basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
-  
-  package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
-  
-  package.list <- setdiff(package.list,basic.packages)
-  
-  if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
-  
-}
-# necessary packages
-using("dplyr","tidyr", "readr", "lubridate", "clock", "magrittr", "olsrr", "broom", "Metrics")
-##########################################################################
-
+library("dplyr")
+library("tidyr" )
+library("readr")
+library("lubridate")
+library("clock")
+library("magrittr") 
+library("olsrr" )
+library("broom" )
+library("Metrics")
 
 
 ##########################################################################
@@ -91,73 +66,74 @@ cat("Test dataset dimensions:", dim(df_test), "\n")
 
 
 
+
 # Estimating (Training) Models
-mod_0 <- lm(Umsatz ~ 
-            Warengruppe 
+mod_0 <- lm(Umsatz ~ as.factor(Warengruppe) 
           + KielerWoche 
-          + Bewoelkung 
+          + as.factor(Bewoelkung) 
           + Temperatur 
           + Windgeschwindigkeit 
-          + Wettercode  
-          + Feiertag 
-          + Ferien 
-          + Wochentag
+          + as.factor(Wettercode)  
+          + as.factor(Feiertag) 
+          + as.factor(Ferien) 
+          + as.factor(Wochentag)
           , df_train)
 
-mod_1 <- lm(Umsatz ~ 
-                Warengruppe 
-              + KielerWoche 
-              + Bewoelkung 
-              + Temperatur 
-             # + Windgeschwindigkeit 
-             # + Wettercode  
-              + Feiertag 
-              + Ferien 
-              + Wochentag
-              , df_train)
 
-mod_2 <- lm(Umsatz ~ 
-              Warengruppe 
+mod_1 <- lm(Umsatz ~ as.factor(Warengruppe) 
             + KielerWoche 
-            + Bewoelkung 
+            + as.factor(Bewoelkung) 
             + Temperatur 
-          #  # + Windgeschwindigkeit 
-          #  # + Wettercode  
-            + Feiertag 
-            + Ferien 
-          #  + Wochentag
+           #+ Windgeschwindigkeit 
+           #+ as.factor(Wettercode)  
+            + as.factor(Feiertag) 
+            + as.factor(Ferien) 
+            + as.factor(Wochentag)
             , df_train)
 
-mod_3 <- lm(Umsatz ~ 
-              Warengruppe 
+mod_2 <- lm(Umsatz ~ as.factor(Warengruppe) 
             + KielerWoche 
-         #   + Bewoelkung 
+            + as.factor(Bewoelkung) 
             + Temperatur 
-         #   #  # + Windgeschwindigkeit 
-         #   #  # + Wettercode  
-            + Feiertag 
-            + Ferien 
-         #   #  + Wochentag
+          #  #+ Windgeschwindigkeit 
+          #  #+ as.factor(Wettercode)  
+            + as.factor(Feiertag) 
+            + as.factor(Ferien) 
+           # + as.factor(Wochentag)
             , df_train)
 
-mod_4 <- lm(Umsatz ~ 
-              Warengruppe 
-         #   + KielerWoche 
-         #   #   + Bewoelkung 
+mod_3 <- lm(Umsatz ~ as.factor(Warengruppe) 
+            + KielerWoche 
+           # + as.factor(Bewoelkung) 
             + Temperatur 
-         #   #   #  # + Windgeschwindigkeit 
-         #   #   #  # + Wettercode  
-            + Feiertag 
-            + Ferien 
-         #   #   #  + Wochentag
+          #  #  #+ Windgeschwindigkeit 
+          #  #  #+ as.factor(Wettercode)  
+            + as.factor(Feiertag) 
+            + as.factor(Ferien) 
+          #  # + as.factor(Wochentag)
             , df_train)
 
+mod_4 <- lm(Umsatz ~ as.factor(Warengruppe) 
+           # + KielerWoche 
+          #  # + as.factor(Bewoelkung) 
+            + Temperatur 
+          #  #  #  #+ Windgeschwindigkeit 
+          #  #  #  #+ as.factor(Wettercode)  
+            + as.factor(Feiertag) 
+            + as.factor(Ferien) 
+          #  #  # + as.factor(Wochentag)
+            , df_train)
 
+glance(mod_0)
+glance(mod_1)
+glance(mod_2)
+glance(mod_3)
+glance(mod_4)
 
 ### Nutzung des resultierenden Modells für eine Vohersage
 
 # Make predictions using the test data
-predicted_values <- predict(mod_4, newdata = df_test)
+predicted_values <- predict(mod_4, newdata = df_validate)
 
 # Compare the predicted values with the actual values
 comparison <- data.frame(Actual = df_validate, Predicted = predicted_values)
